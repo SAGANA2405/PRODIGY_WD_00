@@ -1,0 +1,110 @@
+
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <input type="text" id="locationInput" placeholder="Enter city name">
+        <button id="fetchWeather">Get Weather</button>
+        <button id="fetchCurrentLocation">Get Current Location Weather</button>
+        <div id="weatherInfo">
+            <p id="location"></p>
+            <p id="temperature"></p>
+            <p id="conditions"></p>
+            <p id="humidity"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input, button {
+    padding: 10px;
+    margin: 10px;
+    font-size: 16px;
+}
+
+button {
+    cursor: pointer;
+}
+
+#weatherInfo {
+    margin-top: 20px;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const apiKey = 'YOUR_API_KEY'; // Replace with your actual API key
+    const weatherInfo = document.getElementById('weatherInfo');
+
+    document.getElementById('fetchWeather').addEventListener('click', () => {
+        const location = document.getElementById('locationInput').value;
+        if (location) {
+            fetchWeather(location);
+        }
+    });
+
+    document.getElementById('fetchCurrentLocation').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                const { latitude, longitude } = position.coords;
+                fetchWeatherByCoords(latitude, longitude);
+            }, error => {
+                alert('Unable to retrieve your location.');
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    });
+
+    function fetchWeather(location) {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => displayWeather(data))
+            .catch(error => alert('Error fetching weather data.'));
+    }
+
+    function fetchWeatherByCoords(lat, lon) {
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => displayWeather(data))
+            .catch(error => alert('Error fetching weather data.'));
+    }
+
+    function displayWeather(data) {
+        if (data.cod === 200) {
+            document.getElementById('location').textContent = `Location: ${data.name}, ${data.sys.country}`;
+            document.getElementById('temperature').textContent = `Temperature: ${data.main.temp} °C`;
+            document.getElementById('conditions').textContent = `Conditions: ${data.weather[0].description}`;
+            document.getElementById('humidity').textContent = `Humidity: ${data.main.humidity}%`;
+        } else {
+            alert('Location not found.');
+        }
+    }
+});
+
+
