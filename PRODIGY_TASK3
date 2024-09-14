@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <div id="game-board">
+            <!-- Game cells will be dynamically added here -->
+        </div>
+        <button id="reset">Reset Game</button>
+        <p id="message">Player X's turn</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+}
+
+.game-container {
+    text-align: center;
+    border: 2px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+#game-board div {
+    width: 100px;
+    height: 100px;
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#game-board div:hover {
+    background-color: #ccc;
+}
+
+button {
+    font-size: 1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#message {
+    font-size: 1.2em;
+    margin-top: 10px;
+}
+
+// script.js
+
+const gameBoard = document.getElementById('game-board');
+const message = document.getElementById('message');
+const resetButton = document.getElementById('reset');
+
+let currentPlayer = 'X';
+let gameState = Array(9).fill(null);
+let isGameActive = true;
+
+// Initialize game board
+function initializeBoard() {
+    gameBoard.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.addEventListener('click', () => handleCellClick(i));
+        gameBoard.appendChild(cell);
+    }
+}
+
+// Handle cell click
+function handleCellClick(index) {
+    if (gameState[index] || !isGameActive) return;
+    
+    gameState[index] = currentPlayer;
+    updateBoard();
+    if (checkWinner()) {
+        message.textContent = `Player ${currentPlayer} wins!`;
+        isGameActive = false;
+    } else if (gameState.every(cell => cell)) {
+        message.textContent = 'It\'s a draw!';
+        isGameActive = false;
+    } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        message.textContent = `Player ${currentPlayer}'s turn`;
+    }
+}
+
+// Update the board display
+function updateBoard() {
+    const cells = gameBoard.children;
+    gameState.forEach((value, index) => {
+        cells[index].textContent = value;
+    });
+}
+
+// Check for a winner
+function checkWinner() {
+    const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6]  // Diagonals
+    ];
+    return winPatterns.some(pattern => {
+        const [a, b, c] = pattern;
+        return gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c];
+    });
+}
+
+// Reset the game
+function resetGame() {
+    gameState = Array(9).fill(null);
+    isGameActive = true;
+    currentPlayer = 'X';
+    message.textContent = `Player ${currentPlayer}'s turn`;
+    updateBoard();
+}
+
+// Event listeners
+resetButton.addEventListener('click', resetGame);
+
+// Initialize board on page load
+initializeBoard();
